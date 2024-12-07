@@ -1,5 +1,4 @@
-const parseInput = (input: string): number[][] =>
-  input.split("\n").map((line) => line.split(" ").map(Number));
+const parseInput = (input: string): number[][] => input.split('\n').map((line) => line.split(' ').map(Number));
 
 const isSafeReport = (report: number[]): boolean => {
   let increasing = true;

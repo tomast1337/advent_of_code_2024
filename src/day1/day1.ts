@@ -1,7 +1,4 @@
-const calculateSimilarityScore = (
-  leftList: number[],
-  rightList: number[]
-): number => {
+const calculateSimilarityScore = (leftList: number[], rightList: number[]): number => {
   // Step 2: Create a frequency map for the right list
   const frequencyMap: { [key: number]: number } = {};
   for (const num of rightList) {
@@ -22,10 +19,7 @@ const calculateSimilarityScore = (
   return similarityScore;
 };
 
-const calculateTotalDistance = (
-  leftList: number[],
-  rightList: number[]
-): number => {
+const calculateTotalDistance = (leftList: number[], rightList: number[]): number => {
   // Step 2: Sort both lists
   leftList.sort((a, b) => a - b);
   rightList.sort((a, b) => a - b);
@@ -41,13 +35,13 @@ const calculateTotalDistance = (
 
 const parseInput = (input: string): [number[], number[]] => {
   // Step 1: Split the input into lines
-  const lines = input.split("\n");
+  const lines = input.split('\n');
 
   // Step 3: Parse each line into a pair of numbers
   const leftList = [];
   const rightList = [];
   for (const line of lines) {
-    const [left, right] = line.split("   ").map(Number);
+    const [left, right] = line.split('   ').map(Number);
     leftList.push(left);
     rightList.push(right);
   }
