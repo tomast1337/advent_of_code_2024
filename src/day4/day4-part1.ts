@@ -1,4 +1,4 @@
-export function part1(input: string): number {
+export const part1 = (input: string): number => {
   const grid = input.split('\n').map((line) => line.split(''));
   const word = 'XMAS';
 
@@ -18,9 +18,7 @@ export function part1(input: string): number {
   const wordLen = word.length;
   let count = 0;
 
-  function isValid(r: number, c: number): boolean {
-    return r >= 0 && r < rows && c >= 0 && c < cols;
-  }
+  const isValid = (r: number, c: number) => r >= 0 && r < rows && c >= 0 && c < cols;
 
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
@@ -40,4 +38,4 @@ export function part1(input: string): number {
   }
 
   return count;
-}
+};

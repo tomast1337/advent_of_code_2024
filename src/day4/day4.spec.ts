@@ -4,14 +4,10 @@ import fs from 'fs';
 
 describe('day4', () => {
   let data: string;
+  let testdata: string;
   beforeEach(() => {
-    data = fs.readFileSync('day4/day4.txt', 'utf8');
-  });
-
-  it('should solve part 1 with test data', () => {
-    expect(
-      part1(
-        `MMMSXXMASM
+    data = fs.readFileSync('./src/day4/day4.txt', 'utf8');
+    testdata = `MMMSXXMASM
 MSAMXMSMSA
 AMXSXMAAMM
 MSAMASMSMX
@@ -20,9 +16,11 @@ XXAMMXXAMA
 SMSMSASXSS
 SAXAMASAAA
 MAMMMXMMMM
-MXMXAXMASX`,
-      ),
-    ).toBe(18);
+MXMXAXMASX`;
+  });
+
+  it('should solve part 1 with test data', () => {
+    expect(part1(testdata)).toBe(18);
   });
 
   it('should solve part 1', () => {
@@ -31,18 +29,7 @@ MXMXAXMASX`,
   });
 
   it('should solve part 2 with test data', () => {
-    expect(
-      part2(`.M.S......
-..A..MSMS.
-.M.S.MAA..
-..A.ASMSM.
-.M.S.M....
-..........
-S.S.S.S.S.
-.A.A.A.A..
-M.M.M.M.M.
-..........`),
-    ).toBe(9);
+    expect(part2(testdata)).toBe(9);
   });
 
   it('should solve part 2', () => {
