@@ -11,7 +11,7 @@ describe('day2', () => {
 8 6 4 4 1
 1 3 6 7 9`;
 
-    data = fs.readFileSync('day2/day2.txt', 'utf8');
+    data = fs.readFileSync('./src/day2/day2.txt', 'utf8');
   });
 
   it('should solve part 1 with test data', () => {

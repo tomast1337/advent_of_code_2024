@@ -4,7 +4,7 @@ import fs from 'fs';
 describe('day3', () => {
   let data: string;
   beforeEach(() => {
-    data = fs.readFileSync('day3/day3.txt', 'utf8');
+    data = fs.readFileSync('./src/day3/day3.txt', 'utf8');
   });
 
   it('should solve part 1 with test data', () => {
