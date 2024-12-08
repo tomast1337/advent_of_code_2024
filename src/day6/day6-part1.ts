@@ -1,69 +1,31 @@
-type Direction = '^' | '>' | 'v' | '<';
-type Position = { x: number; y: number };
-const parseMap = (data: string): { grid: string[][]; start: Position; direction: Direction } => {
-  const map = data.split('\n');
-  let start: Position = { x: 0, y: 0 };
-  let direction: Direction = '^';
-  const grid = map.map((line, y) => {
-    return line.split('').map((char, x) => {
-      if ('^>v<'.includes(char)) {
-        start = { x, y };
-        direction = char as Direction;
-        return '.';
-      }
-      return char;
-    });
-  });
-  return { grid, start, direction };
-};
+import { directions, Position, parseMap } from './util';
 
-const shouldEnd = (grid: string[][], pos: Position, dir: Direction) => {
-  const nextX = pos.x + { '^': 0, '>': 1, v: 0, '<': -1 }[dir];
-  const nextY = pos.y + { '^': -1, '>': 0, v: 1, '<': 0 }[dir];
-  if (nextX < 0 || nextX >= grid[0].length || nextY < 0 || nextY >= grid.length) {
-    return false;
-  }
-  return true;
-};
-
-const moveGuard = (grid: string[][], start: Position, direction: Direction) => {
-  const directions: Record<Direction, Position> = {
-    '^': { x: 0, y: -1 },
-    '>': { x: 1, y: 0 },
-    v: { x: 0, y: 1 },
-    '<': { x: -1, y: 0 },
-  };
-  const turnRight: Record<Direction, Direction> = {
-    '^': '>',
-    '>': 'v',
-    v: '<',
-    '<': '^',
-  };
-
+const moveGuard1 = (grid: string[][], start: Position, dir: number) => {
   const visited = new Set<string>();
   let { x, y } = start;
-  let dir = direction;
+  let { x: dx, y: dy } = directions[dir];
 
-  do {
+  let shouldContinue = true;
+  while (shouldContinue) {
     visited.add(`${x},${y}`);
-    const nextX = x + directions[dir].x;
-    const nextY = y + directions[dir].y;
+    const [x1, y1] = [x + dx, y + dy];
 
-    if (nextX >= 0 && nextX < grid[0].length && nextY >= 0 && nextY < grid.length && grid[nextY][nextX] !== '#') {
-      x = nextX;
-      y = nextY;
+    if (grid[y1]?.[x1] === '#') {
+      dir = (dir + 1) % 4;
+      [dx, dy] = [directions[dir].x, directions[dir].y];
     } else {
-      dir = turnRight[dir];
+      x = x1;
+      y = y1;
     }
-  } while (shouldEnd(grid, { x, y }, dir));
 
-  // add last position
-  visited.add(`${x},${y}`);
+    shouldContinue = grid[y]?.[x] !== undefined;
+  }
 
   return visited.size;
 };
 
 export const part1 = (data: string) => {
   const { grid, start, direction } = parseMap(data);
-  return moveGuard(grid, start, direction);
+  const dirIndex = '^>v<'.indexOf(direction);
+  return moveGuard1(grid, start, dirIndex);
 };
