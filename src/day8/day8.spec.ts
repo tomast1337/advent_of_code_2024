@@ -1,6 +1,6 @@
 import { part1, part2 } from './day8';
 import fs from 'fs';
-describe('day1', () => {
+describe('day8', () => {
   let testData: string;
   let data: string;
   beforeEach(() => {
