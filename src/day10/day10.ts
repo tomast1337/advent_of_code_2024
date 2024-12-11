@@ -47,7 +47,6 @@ const calculateTrailheadScores = (map: number[][]) => {
       }
     }
   }
-  console.log(totalScore);
 
   return totalScore;
 };
