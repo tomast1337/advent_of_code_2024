@@ -36,7 +36,7 @@ const exploreRegionAreaPerimeter = (start: Point, type: string, map: string[][],
     }
   }
 
-  const sides = detectCorners(area, [rows, cols]);
+  const sides = detectCorners(area);
 
   return { area: area.length, perimeter, sides };
 };
