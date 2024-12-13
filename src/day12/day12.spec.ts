@@ -1,4 +1,4 @@
-import { part1, part2 } from './day12';
+import { GetPrices } from './day12';
 import fs from 'fs';
 describe('day12', () => {
   let data: string;
@@ -7,27 +7,26 @@ describe('day12', () => {
   });
 
   it('should solve part 1 first example', () => {
-    expect(
-      part1(`AAAA
+    const { totalPricePerimeter, totalPriceSide } = GetPrices(`AAAA
 BBCD
 BBCC
-EEEC`),
-    ).toBe(140);
+EEEC`);
+    expect(totalPricePerimeter).toBe(140);
+    expect(totalPriceSide).toBe(80);
   });
 
   it('should solve part 1 second example', () => {
-    expect(
-      part1(`OOOOO
+    const { totalPricePerimeter, totalPriceSide } = GetPrices(`OOOOO
 OXOXO
 OOOOO
 OXOXO
-OOOOO`),
-    ).toBe(772);
+OOOOO`);
+    expect(totalPricePerimeter).toBe(772);
+    expect(totalPriceSide).toBe(436);
   });
 
   it('should solve part 1 third example', () => {
-    expect(
-      part1(`RRRRIICCFF
+    const { totalPricePerimeter, totalPriceSide } = GetPrices(`RRRRIICCFF
 RRRRIICCCF
 VVRRRCCFFF
 VVRCCCJFFF
@@ -36,72 +35,36 @@ VVIVCCJJEE
 VVIIICJJEE
 MIIIIIJJEE
 MIIISIJEEE
-MMMISSJEEE`),
-    ).toBe(1930);
-  });
-
-  it('should solve part 1', () => {
-    const result = part1(data);
-    console.log(`Part 1: ${result}`);
-  });
-
-  it('should solve part 2 first example', () => {
-    expect(
-      part2(`AAAA
-BBCD
-BBCC
-EEEC`),
-    ).toBe(80);
-  });
-
-  it('should solve part 2 first example', () => {
-    expect(
-      part2(`OOOOO
-OXOXO
-OOOOO
-OXOXO
-OOOOO`),
-    ).toBe(436);
+MMMISSJEEE`);
+    expect(totalPricePerimeter).toBe(1930);
+    expect(totalPriceSide).toBe(1206);
   });
 
   it('should solve part 2 second example', () => {
     expect(
-      part2(`EEEEE
+      GetPrices(`EEEEE
 EXXXX
 EEEEE
 EXXXX
-EEEEE`),
+EEEEE`).totalPriceSide,
     ).toBe(236);
   });
 
   it('should solve part 2 third example', () => {
     expect(
-      part2(`AAAAAA
+      GetPrices(`AAAAAA
 AAABBA
 AAABBA
 ABBAAA
 ABBAAA
-AAAAAA`),
+AAAAAA`).totalPriceSide,
     ).toBe(368);
   });
 
-  it('should solve part 2 fourth example', () => {
-    expect(
-      part2(`RRRRIICCFF
-RRRRIICCCF
-VVRRRCCFFF
-VVRCCCJFFF
-VVVVCJJCFE
-VVIVCCJJEE
-VVIIICJJEE
-MIIIIIJJEE
-MIIISIJEEE
-MMMISSJEEE`),
-    ).toBe(1206);
-  });
+  it('should solve part 1 and 2', () => {
+    const { totalPricePerimeter, totalPriceSide } = GetPrices(data);
 
-  it('should solve part 2', () => {
-    const result = part2(data);
-    console.log(`Part 1: ${result}`);
+    console.log(`Part 1: ${totalPricePerimeter}`);
+    console.log(`Part 2: ${totalPriceSide}`);
   });
 });
