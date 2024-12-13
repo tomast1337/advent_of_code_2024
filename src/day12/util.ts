@@ -1,7 +1,7 @@
 export type Point = [number, number];
 type Mat2d = number[][];
 
-const generateKernels = (): number[][][] => {
+const generateKernels = () => {
   const rotate90 = (matrix: number[][]): number[][] => matrix[0].map((_, colIndex) => matrix.map((row) => row[colIndex]).reverse());
   const invert = (matrix: number[][]): number[][] => matrix.map((row) => row.map((cell) => (cell === 0 ? 1 : 0)));
   const kernels: Mat2d[] = [];
@@ -48,7 +48,7 @@ const convolute = (map: Mat2d, type: number, kernel: Mat2d) => {
   return count;
 };
 
-const RegionToMap = (region: Point[]) => {
+const regionToMap = (region: Point[]) => {
   const mapSize = getRegionSize(region);
   const offset = [Math.min(...region.map((point) => point[0])), Math.min(...region.map((point) => point[1]))];
   const map: Mat2d = new Array(mapSize[0]).fill(0).map(() => new Array(mapSize[1]).fill(0));
@@ -78,7 +78,7 @@ const getRegionSize = (region: Point[]) => {
 };
 
 export const detectCorners = (region: Point[]) => {
-  const map = doubleRes(addborder(RegionToMap(region)));
+  const map = doubleRes(addborder(regionToMap(region)));
   let count = 0;
   for (const kernel of kernels) count += convolute(map, 1, kernel);
   return count;
