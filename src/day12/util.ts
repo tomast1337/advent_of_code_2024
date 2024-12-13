@@ -1,69 +1,29 @@
 export type Point = [number, number];
 type Mat2d = number[][];
 
-const kernels = [
-  [
+const generateKernels = (): number[][][] => {
+  const rotate90 = (matrix: number[][]): number[][] => matrix[0].map((_, colIndex) => matrix.map((row) => row[colIndex]).reverse());
+  const invert = (matrix: number[][]): number[][] => matrix.map((row) => row.map((cell) => (cell === 0 ? 1 : 0)));
+  const kernels: Mat2d[] = [];
+  let cornerCase = [
+    [1, 0, 0],
+    [0, 1, 1],
+    [0, 1, 1],
+  ];
+  let baseKernel = [
     [0, 0, 0],
     [0, 1, 1],
     [0, 1, 1],
-  ],
-  [
-    [0, 0, 0],
-    [1, 1, 0],
-    [1, 1, 0],
-  ],
-  [
-    [1, 1, 0],
-    [1, 1, 0],
-    [0, 0, 0],
-  ],
-  [
-    [0, 1, 1],
-    [0, 1, 1],
-    [0, 0, 0],
-  ],
-  [
-    [1, 0, 0],
-    [0, 1, 1],
-    [0, 1, 1],
-  ],
-  [
-    [0, 0, 1],
-    [1, 1, 0],
-    [1, 1, 0],
-  ],
-  [
-    [1, 1, 0],
-    [1, 1, 0],
-    [0, 0, 1],
-  ],
-  [
-    [0, 1, 1],
-    [0, 1, 1],
-    [1, 0, 0],
-  ],
-  [
-    [1, 1, 1],
-    [1, 0, 0],
-    [1, 0, 0],
-  ],
-  [
-    [1, 0, 0],
-    [1, 0, 0],
-    [1, 1, 1],
-  ],
-  [
-    [0, 0, 1],
-    [0, 0, 1],
-    [1, 1, 1],
-  ],
-  [
-    [1, 1, 1],
-    [0, 0, 1],
-    [0, 0, 1],
-  ],
-];
+  ];
+  for (let i = 0; i < 4; i++) {
+    kernels.push(baseKernel, invert(baseKernel), cornerCase);
+    baseKernel = rotate90(baseKernel);
+    cornerCase = rotate90(cornerCase);
+  }
+  return kernels;
+};
 
+const kernels = generateKernels();
 const doubleRes = (map: Mat2d) => {
   const newMap: Mat2d = [];
   const [rows, cols] = [map.length, map[0].length];
@@ -90,7 +50,7 @@ const convolute = (map: Mat2d, type: number, kernel: Mat2d) => {
 
 const RegionToMap = (region: Point[]) => {
   const mapSize = getRegionSize(region);
-  const offset = getRegionsOffset(region);
+  const offset = [Math.min(...region.map((point) => point[0])), Math.min(...region.map((point) => point[1]))];
   const map: Mat2d = new Array(mapSize[0]).fill(0).map(() => new Array(mapSize[1]).fill(0));
   for (let i = 0; i < region.length; i++) {
     const [x, y] = region[i];
@@ -108,23 +68,13 @@ const addborder = (map: Mat2d) => {
 
 const getRegionBounds = (region: Point[]) => {
   let [minX, minY, maxX, maxY] = [Infinity, Infinity, -Infinity, -Infinity];
-  for (const [x, y] of region) {
-    minX = Math.min(minX, x);
-    minY = Math.min(minY, y);
-    maxX = Math.max(maxX, x);
-    maxY = Math.max(maxY, y);
-  }
+  for (const [x, y] of region) [minX, minY, maxX, maxY] = [Math.min(minX, x), Math.min(minY, y), Math.max(maxX, x), Math.max(maxY, y)];
   return [minX, minY, maxX, maxY];
 };
 
 const getRegionSize = (region: Point[]) => {
   const [minX, minY, maxX, maxY] = getRegionBounds(region);
   return [maxX - minX + 1, maxY - minY + 1];
-};
-
-const getRegionsOffset = (region: Point[]) => {
-  const [minX, minY] = getRegionBounds(region);
-  return [minX, minY];
 };
 
 export const detectCorners = (region: Point[]) => {
