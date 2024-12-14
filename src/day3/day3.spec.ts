@@ -1,4 +1,4 @@
-import { part1, part2 } from './day3';
+import { mullItOver, mullItOverConditional } from './day3';
 import fs from 'fs';
 
 describe('day3', () => {
@@ -8,20 +8,20 @@ describe('day3', () => {
   });
 
   it('should solve part 1 with test data', () => {
-    expect(part1(`xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))`)).toBe(161);
+    expect(mullItOver(`xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))`)).toBe(161);
   });
 
   it('should solve part 1', () => {
-    const result = part1(data);
+    const result = mullItOver(data);
     console.log(`Result part1: ${result}`);
   });
 
   it('should solve part 2 with test data', () => {
-    expect(part2(`xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))`)).toBe(48);
+    expect(mullItOverConditional(`xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))`)).toBe(48);
   });
 
   it('should solve part 2', () => {
-    const result = part2(data);
+    const result = mullItOverConditional(data);
     console.log(`Result part2: ${result}`);
   });
 });
