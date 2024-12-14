@@ -49,10 +49,12 @@ const convolute = (map: Mat2d, type: number, kernel: Mat2d) => {
 };
 
 const regionToMap = (region: Point[]) => {
+  // find bounding box
   let [minX, minY, maxX, maxY] = [Infinity, Infinity, -Infinity, -Infinity];
   for (const [x, y] of region) [minX, minY, maxX, maxY] = [Math.min(minX, x), Math.min(minY, y), Math.max(maxX, x), Math.max(maxY, y)];
   const [sizeX, sizeY] = [maxX - minX + 1, maxY - minY + 1];
 
+  // create new map
   const offset = [Math.min(...region.map((point) => point[0])), Math.min(...region.map((point) => point[1]))];
   const map: Mat2d = new Array(sizeX).fill(0).map(() => new Array(sizeY).fill(0));
 
@@ -61,10 +63,7 @@ const regionToMap = (region: Point[]) => {
     map[x - offset[0]][y - offset[1]] = 1;
   }
 
-  return map;
-};
-
-const addborder = (map: Mat2d) => {
+  // add padding
   const [rows, cols] = [map.length, map[0].length];
   const newMap: Mat2d = new Array(map.length + 2).fill(0).map(() => new Array(map[0].length + 2).fill(0));
   for (let i = 0; i < rows; i++) for (let j = 0; j < cols; j++) newMap[i + 1][j + 1] = map[i][j];
@@ -72,7 +71,7 @@ const addborder = (map: Mat2d) => {
 };
 
 export const detectCorners = (region: Point[]) => {
-  const map = doubleRes(addborder(regionToMap(region)));
+  const map = doubleRes(regionToMap(region));
   let count = 0;
   for (const kernel of kernels) count += convolute(map, 1, kernel);
   return count;
