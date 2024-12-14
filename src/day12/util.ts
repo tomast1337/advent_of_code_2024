@@ -24,16 +24,6 @@ const generateKernels = () => {
 };
 
 const kernels = generateKernels();
-const doubleRes = (map: Mat2d) => {
-  const newMap: Mat2d = [];
-  const [rows, cols] = [map.length, map[0].length];
-  for (let i = 0; i < rows; i++) {
-    const newRow: number[] = [];
-    for (let j = 0; j < cols; j++) newRow.push(map[i][j], map[i][j]);
-    newMap.push(newRow, newRow);
-  }
-  return newMap;
-};
 
 const convolute = (map: Mat2d, type: number, kernel: Mat2d) => {
   const calculateKernelSum = (i: number, j: number) => {
@@ -46,6 +36,17 @@ const convolute = (map: Mat2d, type: number, kernel: Mat2d) => {
   const [rows, cols] = [map.length, map[0].length];
   for (let i = 0; i < rows - 2; i++) for (let j = 0; j < cols - 2; j++) if (calculateKernelSum(i, j) === 9) count++;
   return count;
+};
+
+const doubleRes = (map: Mat2d) => {
+  const newMap: Mat2d = [];
+  const [rows, cols] = [map.length, map[0].length];
+  for (let i = 0; i < rows; i++) {
+    const newRow: number[] = [];
+    for (let j = 0; j < cols; j++) newRow.push(map[i][j], map[i][j]);
+    newMap.push(newRow, newRow);
+  }
+  return newMap;
 };
 
 const regionToMap = (region: Point[]) => {
