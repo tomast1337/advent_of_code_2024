@@ -38,8 +38,6 @@ const calculateXYVariance = (grid: number[][]) => {
 };
 
 const printGrid = (grid: Grid) => {
-  // clear screen
-
   grid.forEach((row) => {
     process.stdout.write(row.map((cell) => (cell > 0 ? '🤖' : '🟩')).join('') + '\n');
   });
@@ -89,7 +87,7 @@ const part2 = () => {
         await waitForKeyPress();
       }
       await new Promise((resolve) => setTimeout(resolve, 10));
-      console.clear();
+      process.stdout.write('\x1Bc');
     }
   };
 
