@@ -49,13 +49,18 @@ const convolute = (map: Mat2d, type: number, kernel: Mat2d) => {
 };
 
 const regionToMap = (region: Point[]) => {
-  const mapSize = getRegionSize(region);
+  let [minX, minY, maxX, maxY] = [Infinity, Infinity, -Infinity, -Infinity];
+  for (const [x, y] of region) [minX, minY, maxX, maxY] = [Math.min(minX, x), Math.min(minY, y), Math.max(maxX, x), Math.max(maxY, y)];
+  const [sizeX, sizeY] = [maxX - minX + 1, maxY - minY + 1];
+
   const offset = [Math.min(...region.map((point) => point[0])), Math.min(...region.map((point) => point[1]))];
-  const map: Mat2d = new Array(mapSize[0]).fill(0).map(() => new Array(mapSize[1]).fill(0));
+  const map: Mat2d = new Array(sizeX).fill(0).map(() => new Array(sizeY).fill(0));
+
   for (let i = 0; i < region.length; i++) {
     const [x, y] = region[i];
     map[x - offset[0]][y - offset[1]] = 1;
   }
+
   return map;
 };
 
@@ -64,17 +69,6 @@ const addborder = (map: Mat2d) => {
   const newMap: Mat2d = new Array(map.length + 2).fill(0).map(() => new Array(map[0].length + 2).fill(0));
   for (let i = 0; i < rows; i++) for (let j = 0; j < cols; j++) newMap[i + 1][j + 1] = map[i][j];
   return newMap;
-};
-
-const getRegionBounds = (region: Point[]) => {
-  let [minX, minY, maxX, maxY] = [Infinity, Infinity, -Infinity, -Infinity];
-  for (const [x, y] of region) [minX, minY, maxX, maxY] = [Math.min(minX, x), Math.min(minY, y), Math.max(maxX, x), Math.max(maxY, y)];
-  return [minX, minY, maxX, maxY];
-};
-
-const getRegionSize = (region: Point[]) => {
-  const [minX, minY, maxX, maxY] = getRegionBounds(region);
-  return [maxX - minX + 1, maxY - minY + 1];
 };
 
 export const detectCorners = (region: Point[]) => {
