@@ -325,7 +325,7 @@ describe('day15', () => {
         const direction: Direction = '>';
 
         const result = moveRobot(warehouse, robotPosition, direction);
-        console.log(result);
+        expect(result).toEqual([1, 2]);
         expect(warehouse).toEqual([
           ['.', '.', '.'],
           ['.', '.', '@'],
