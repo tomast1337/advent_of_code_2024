@@ -1,29 +1,32 @@
-enum MapItens {
-  EMPTY = '.',
-  WALL = '#',
-  BOX = 'O',
-  ROBOT = '@',
-}
-
-enum Direction {
-  UP = '^',
-  DOWN = 'v',
-  LEFT = '<',
-  RIGHT = '>',
-}
-
-type Position = [number, number];
-
-type Warehouse = MapItens[][];
-
-const movements = {
-  [Direction.UP]: (position: Position) => [position[0], position[1] - 1],
-  [Direction.DOWN]: (position: Position) => [position[0], position[1] + 1],
-  [Direction.LEFT]: (position: Position) => [position[0] - 1, position[1]],
-  [Direction.RIGHT]: (position: Position) => [position[0] + 1, position[1]],
+type MapItens = '.' | '#' | 'O' | '@';
+const MapItens: Record<string, MapItens> = {
+  EMPTY: '.',
+  WALL: '#',
+  BOX: 'O',
+  ROBOT: '@',
 };
 
-const parseWarehouseRobotInstructions = (data: string) => {
+export type Direction = '^' | 'v' | '<' | '>';
+
+const Directions: Record<string, Direction> = {
+  UP: '^',
+  DOWN: 'v',
+  LEFT: '<',
+  RIGHT: '>',
+};
+
+export type Position = [number, number];
+
+export type Warehouse = MapItens[][];
+
+const movements = {
+  [Directions.UP]: (position: Position) => [position[0] - 1, position[1]],
+  [Directions.DOWN]: (position: Position) => [position[0] + 1, position[1]],
+  [Directions.LEFT]: (position: Position) => [position[0], position[1] - 1],
+  [Directions.RIGHT]: (position: Position) => [position[0], position[1] + 1],
+};
+
+const parseRobotMovementInstructions = (data: string) => {
   const [map, moves] = data.split('\n\n');
   const warehouse = map.split('\n').map((row) => row.split('') as MapItens[]);
   const robotInstructions = moves.split('').map((move) => move as Direction);
@@ -37,52 +40,64 @@ const parseWarehouseRobotInstructions = (data: string) => {
   return { warehouse, robotInstructions, robotPosition };
 };
 
-const moveBox = (warehouse: Warehouse, boxPosition: Position, direction: Direction) => {
-  const [newX, newY] = movements[direction](boxPosition);
-  if (warehouse[newX][newY] === MapItens.WALL) {
+export const moveBox = (warehouse: Warehouse, boxPosition: Position, direction: Direction): boolean => {
+  const [newY, newX] = movements[direction](boxPosition); // Use correct row-column order
+
+  // Check for out-of-bounds or wall
+  if (newY < 0 || newY >= warehouse.length || newX < 0 || newX >= warehouse[0].length || warehouse[newY][newX] === MapItens.WALL) {
     return false;
   }
-  if (warehouse[newX][newY] === MapItens.BOX) {
-    // try to move next box
-    const wasmoved = moveBox(warehouse, [newX, newY], direction);
-    if (!wasmoved) {
+
+  // If there's another box, attempt to move it recursively
+  if (warehouse[newY][newX] === MapItens.BOX) {
+    const canMoveNextBox = moveBox(warehouse, [newY, newX], direction);
+    if (!canMoveNextBox) {
       return false;
     }
   }
-  // move box
-  warehouse[newX][newY] = MapItens.BOX;
+
+  // Move the box
+  warehouse[newY][newX] = MapItens.BOX;
   warehouse[boxPosition[0]][boxPosition[1]] = MapItens.EMPTY;
   return true;
 };
 
-const moveRobot = (warehouse: Warehouse, robotPosition: Position, direction: Direction) => {
-  const [newX, newY] = movements[direction](robotPosition);
-  if (warehouse[newX][newY] === MapItens.WALL) {
-    return false;
+export const moveRobot = (warehouse: Warehouse, robotPosition: Position, direction: Direction): Position => {
+  if (warehouse[robotPosition[1]][robotPosition[0]] !== MapItens.ROBOT) {
+    throw new Error('Robot position is not correct');
   }
-  if (warehouse[newX][newY] === MapItens.BOX) {
-    const wasmoved = moveBox(warehouse, [newX, newY], direction);
-    if (!wasmoved) {
-      return false;
+  const [newX, newY] = movements[direction](robotPosition);
+  // Bounds checking
+  if (newX < 0 || newX >= warehouse[0].length || newY < 0 || newY >= warehouse.length) {
+    return robotPosition; // Out of bounds, robot stays in place
+  }
+  const target = warehouse[newX][newY];
+  if (target === MapItens.WALL) {
+    return robotPosition; // Wall, robot stays in place
+  }
+  if (target === MapItens.BOX) {
+    // Attempt to move the box
+    const boxMoved = moveBox(warehouse, [newX, newY], direction);
+    if (!boxMoved) {
+      return robotPosition; // Box couldn't be moved, robot stays in place
     }
   }
-  // move robot
+  // Move robot
   warehouse[newX][newY] = MapItens.ROBOT;
-  warehouse[robotPosition[0]][robotPosition[1]] = MapItens.EMPTY;
-  return true;
+  warehouse[robotPosition[1]][robotPosition[0]] = MapItens.EMPTY;
+  return [newX, newY];
 };
 
-const printWarehouse = (warehouse: Warehouse) => {
-  const data = warehouse
+export const warehouseToString = (warehouse: Warehouse) =>
+  warehouse
     .map((row) => row.join(''))
     .join('\n')
     .replace(/@/g, '🤖')
     .replace(/#/g, '🧱')
     .replace(/O/g, '📦')
     .replace(/\./g, '🟦');
-  process.stdout.write('\x1Bc');
-  process.stdout.write(data);
-};
+
+const printWarehouse = (warehouse: Warehouse) => process.stdout.write(warehouseToString(warehouse) + '\n\n');
 
 const simulateRobot = (warehouse: Warehouse, robotInstructions: Direction[], robotPosition: Position) => {
   robotInstructions.forEach((direction) => {
@@ -91,20 +106,20 @@ const simulateRobot = (warehouse: Warehouse, robotInstructions: Direction[], rob
   });
 };
 
-const calculateGPS = (warehouse: Warehouse) => {
-  let sum = 0;
-  warehouse.forEach((row, y) => {
-    row.forEach((item, x) => {
-      if (item === MapItens.BOX) {
-        sum += 100 * y + x;
+export const calculateGPS = (warehouse: Warehouse): number => {
+  let gpsSum = 0;
+  for (let y = 0; y < warehouse.length; y++) {
+    for (let x = 0; x < warehouse[0].length; x++) {
+      if (warehouse[y][x] === MapItens.BOX) {
+        gpsSum += 100 * y + x;
       }
-    });
-  });
-  return sum;
+    }
+  }
+  return gpsSum;
 };
 
 export const part1 = (data: string) => {
-  const { warehouse, robotInstructions, robotPosition } = parseWarehouseRobotInstructions(data);
+  const { warehouse, robotInstructions, robotPosition } = parseRobotMovementInstructions(data);
   simulateRobot(warehouse, robotInstructions, robotPosition);
   return calculateGPS(warehouse);
 };
