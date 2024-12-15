@@ -41,51 +41,51 @@ const parseRobotMovementInstructions = (data: string) => {
 };
 
 export const moveBox = (warehouse: Warehouse, boxPosition: Position, direction: Direction): boolean => {
-  const [newY, newX] = movements[direction](boxPosition); // Use correct row-column order
+  const [newX, newY] = movements[direction](boxPosition); // Use correct row-column order
 
   // Check for out-of-bounds or wall
-  if (newY < 0 || newY >= warehouse.length || newX < 0 || newX >= warehouse[0].length || warehouse[newY][newX] === MapItens.WALL) {
+  if (newX < 0 || newX >= warehouse.length || newY < 0 || newY >= warehouse[0].length || warehouse[newX][newY] === MapItens.WALL) {
     return false;
   }
 
   // If there's another box, attempt to move it recursively
-  if (warehouse[newY][newX] === MapItens.BOX) {
-    const canMoveNextBox = moveBox(warehouse, [newY, newX], direction);
+  if (warehouse[newX][newY] === MapItens.BOX) {
+    const canMoveNextBox = moveBox(warehouse, [newX, newY], direction);
     if (!canMoveNextBox) {
       return false;
     }
   }
 
   // Move the box
-  warehouse[newY][newX] = MapItens.BOX;
+  warehouse[newX][newY] = MapItens.BOX;
   warehouse[boxPosition[0]][boxPosition[1]] = MapItens.EMPTY;
   return true;
 };
 
 export const moveRobot = (warehouse: Warehouse, robotPosition: Position, direction: Direction): Position => {
-  if (warehouse[robotPosition[1]][robotPosition[0]] !== MapItens.ROBOT) {
-    throw new Error('Robot position is not correct');
+  if (warehouse[robotPosition[0]][robotPosition[1]] !== MapItens.ROBOT) {
+    throw new Error(`Robot is not in the correct position: ${robotPosition}`);
   }
-  const [newX, newY] = movements[direction](robotPosition);
+  const [newY, newX] = movements[direction](robotPosition);
   // Bounds checking
-  if (newX < 0 || newX >= warehouse[0].length || newY < 0 || newY >= warehouse.length) {
+  if (newY < 0 || newY >= warehouse.length || newX < 0 || newX >= warehouse[0].length) {
     return robotPosition; // Out of bounds, robot stays in place
   }
-  const target = warehouse[newX][newY];
+  const target = warehouse[newY][newX];
   if (target === MapItens.WALL) {
     return robotPosition; // Wall, robot stays in place
   }
   if (target === MapItens.BOX) {
     // Attempt to move the box
-    const boxMoved = moveBox(warehouse, [newX, newY], direction);
+    const boxMoved = moveBox(warehouse, [newY, newX], direction);
     if (!boxMoved) {
       return robotPosition; // Box couldn't be moved, robot stays in place
     }
   }
   // Move robot
-  warehouse[newX][newY] = MapItens.ROBOT;
-  warehouse[robotPosition[1]][robotPosition[0]] = MapItens.EMPTY;
-  return [newX, newY];
+  warehouse[newY][newX] = MapItens.ROBOT;
+  warehouse[robotPosition[0]][robotPosition[1]] = MapItens.EMPTY;
+  return [newY, newX];
 };
 
 export const warehouseToString = (warehouse: Warehouse) =>
