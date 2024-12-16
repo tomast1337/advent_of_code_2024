@@ -1,5 +1,5 @@
 import fs from 'fs';
-import { part1 } from './day15';
+import { part1 } from './day15-part1';
 
 describe('day15', () => {
   let data: string;
