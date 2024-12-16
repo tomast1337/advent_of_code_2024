@@ -1,6 +1,4 @@
-import { describe } from 'node:test';
-import { Warehouse, part1, moveRobot, warehouseToString, moveBox, Position, Direction } from './day15';
-import fs from 'fs';
+import { Direction, Position, Warehouse, moveBox, moveRobot, warehouseToString } from './day15';
 
 describe('day15', () => {
   describe('warehouseToString', () => {
@@ -532,77 +530,249 @@ describe('day15', () => {
     });
 
     describe('the robot should push a boxes', () => {
-      it('move robot right', () => {
-        const warehouse: Warehouse = [
-          ['.', '.', '.'],
-          ['@', 'O', '.'],
-          ['.', '.', '.'],
-        ];
-        const robotPosition: Position = [1, 0];
+      describe('push one box', () => {
+        it('move robot right', () => {
+          const warehouse: Warehouse = [
+            ['.', '.', '.'],
+            ['@', 'O', '.'],
+            ['.', '.', '.'],
+          ];
+          const robotPosition: Position = [1, 0];
 
-        const direction: Direction = '>';
+          const direction: Direction = '>';
 
-        const result = moveRobot(warehouse, robotPosition, direction);
-        expect(result).toEqual([1, 1]);
-        expect(warehouse).toEqual([
-          ['.', '.', '.'],
-          ['.', '@', 'O'],
-          ['.', '.', '.'],
-        ]);
+          const result = moveRobot(warehouse, robotPosition, direction);
+          expect(result).toEqual([1, 1]);
+          expect(warehouse).toEqual([
+            ['.', '.', '.'],
+            ['.', '@', 'O'],
+            ['.', '.', '.'],
+          ]);
+        });
+
+        it('move robot left', () => {
+          const warehouse: Warehouse = [
+            ['.', '.', '.'],
+            ['.', 'O', '@'],
+            ['.', '.', '.'],
+          ];
+          const robotPosition: Position = [1, 2];
+          const direction: Direction = '<';
+
+          const result = moveRobot(warehouse, robotPosition, direction);
+          expect(result).toEqual([1, 1]);
+          expect(warehouse).toEqual([
+            ['.', '.', '.'],
+            ['O', '@', '.'],
+            ['.', '.', '.'],
+          ]);
+        });
+
+        it('move robot up', () => {
+          const warehouse: Warehouse = [
+            ['.', '.', '.'],
+            ['.', 'O', '.'],
+            ['.', '@', '.'],
+          ];
+          const robotPosition: Position = [2, 1];
+          const direction: Direction = '^';
+
+          const result = moveRobot(warehouse, robotPosition, direction);
+          expect(result).toEqual([1, 1]);
+          expect(warehouse).toEqual([
+            ['.', 'O', '.'],
+            ['.', '@', '.'],
+            ['.', '.', '.'],
+          ]);
+        });
+
+        it('move robot down', () => {
+          const warehouse: Warehouse = [
+            ['.', '@', '.'],
+            ['.', 'O', '.'],
+            ['.', '.', '.'],
+          ];
+          const robotPosition: Position = [0, 1];
+          const direction: Direction = 'v';
+
+          const result = moveRobot(warehouse, robotPosition, direction);
+          expect(result).toEqual([1, 1]);
+          expect(warehouse).toEqual([
+            ['.', '.', '.'],
+            ['.', '@', '.'],
+            ['.', 'O', '.'],
+          ]);
+        });
       });
 
-      it('move robot left', () => {
-        const warehouse: Warehouse = [
-          ['.', '.', '.'],
-          ['.', 'O', '@'],
-          ['.', '.', '.'],
-        ];
-        const robotPosition: Position = [1, 2];
-        const direction: Direction = '<';
+      describe('push two boxes', () => {
+        it('move robot right', () => {
+          const warehouse: Warehouse = [
+            ['.', '.', '.', '.'],
+            ['@', 'O', 'O', '.'],
+            ['.', '.', '.', '.'],
+          ];
+          const robotPosition: Position = [1, 0];
+          const direction: Direction = '>';
 
-        const result = moveRobot(warehouse, robotPosition, direction);
-        expect(result).toEqual([1, 1]);
-        expect(warehouse).toEqual([
-          ['.', '.', '.'],
-          ['O', '@', '.'],
-          ['.', '.', '.'],
-        ]);
+          const result = moveRobot(warehouse, robotPosition, direction);
+          expect(result).toEqual([1, 1]);
+          expect(warehouse).toEqual([
+            ['.', '.', '.', '.'],
+            ['.', '@', 'O', 'O'],
+            ['.', '.', '.', '.'],
+          ]);
+        });
+
+        it('move robot left', () => {
+          const warehouse: Warehouse = [
+            ['.', '.', '.', '.'],
+            ['.', 'O', 'O', '@'],
+            ['.', '.', '.', '.'],
+          ];
+          const robotPosition: Position = [1, 3];
+          const direction: Direction = '<';
+
+          const result = moveRobot(warehouse, robotPosition, direction);
+          expect(result).toEqual([1, 2]);
+          expect(warehouse).toEqual([
+            ['.', '.', '.', '.'],
+            ['O', 'O', '@', '.'],
+            ['.', '.', '.', '.'],
+          ]);
+        });
+
+        it('move robot up', () => {
+          const warehouse: Warehouse = [
+            ['.', '.', '.'],
+            ['.', 'O', '.'],
+            ['.', 'O', '.'],
+            ['.', 'O', '.'],
+            ['.', '@', '.'],
+            ['.', '.', '.'],
+          ];
+          const robotPosition: Position = [4, 1];
+          const direction: Direction = '^';
+
+          const result = moveRobot(warehouse, robotPosition, direction);
+          expect(result).toEqual([3, 1]);
+          expect(warehouse).toEqual([
+            ['.', 'O', '.'],
+            ['.', 'O', '.'],
+            ['.', 'O', '.'],
+            ['.', '@', '.'],
+            ['.', '.', '.'],
+            ['.', '.', '.'],
+          ]);
+        });
+        it('move robot down', () => {
+          const warehouse: Warehouse = [
+            ['.', '.', '.'],
+            ['.', '@', '.'],
+            ['.', 'O', '.'],
+            ['.', 'O', '.'],
+            ['.', 'O', '.'],
+            ['.', '.', '.'],
+          ];
+          const robotPosition: Position = [1, 1];
+          const direction: Direction = 'v';
+
+          const result = moveRobot(warehouse, robotPosition, direction);
+          expect(warehouse).toEqual([
+            ['.', '.', '.'],
+            ['.', '.', '.'],
+            ['.', '@', '.'],
+            ['.', 'O', '.'],
+            ['.', 'O', '.'],
+            ['.', 'O', '.'],
+          ]);
+          expect(result).toEqual([2, 1]);
+        });
       });
 
-      it('move robot up', () => {
-        const warehouse: Warehouse = [
-          ['.', '.', '.'],
-          ['.', 'O', '.'],
-          ['.', '@', '.'],
-        ];
-        const robotPosition: Position = [2, 1];
-        const direction: Direction = '^';
+      describe('should not move robot if the box is blocked', () => {
+        it('move robot right', () => {
+          const warehouse: Warehouse = [
+            ['.', '.', '.', '.', '.'],
+            ['@', 'O', 'O', '#', '.'],
+            ['.', '.', '.', '.', '.'],
+          ];
+          const robotPosition: Position = [1, 0];
+          const direction: Direction = '>';
 
-        const result = moveRobot(warehouse, robotPosition, direction);
-        expect(result).toEqual([1, 1]);
-        expect(warehouse).toEqual([
-          ['.', 'O', '.'],
-          ['.', '@', '.'],
-          ['.', '.', '.'],
-        ]);
-      });
+          const result = moveRobot(warehouse, robotPosition, direction);
+          expect(result).toEqual([1, 0]);
+          expect(warehouse).toEqual([
+            ['.', '.', '.', '.', '.'],
+            ['@', 'O', 'O', '#', '.'],
+            ['.', '.', '.', '.', '.'],
+          ]);
+        });
 
-      it('move robot down', () => {
-        const warehouse: Warehouse = [
-          ['.', '@', '.'],
-          ['.', 'O', '.'],
-          ['.', '.', '.'],
-        ];
-        const robotPosition: Position = [0, 1];
-        const direction: Direction = 'v';
+        it('move robot left', () => {
+          const warehouse: Warehouse = [
+            ['.', '.', '.', '.', '.'],
+            ['.', '#', 'O', 'O', '@'],
+            ['.', '.', '.', '.', '.'],
+          ];
+          const robotPosition: Position = [1, 4];
+          const direction: Direction = '<';
 
-        const result = moveRobot(warehouse, robotPosition, direction);
-        expect(result).toEqual([1, 1]);
-        expect(warehouse).toEqual([
-          ['.', '.', '.'],
-          ['.', '@', '.'],
-          ['.', 'O', '.'],
-        ]);
+          const result = moveRobot(warehouse, robotPosition, direction);
+          expect(result).toEqual([1, 4]);
+          expect(warehouse).toEqual([
+            ['.', '.', '.', '.', '.'],
+            ['.', '#', 'O', 'O', '@'],
+            ['.', '.', '.', '.', '.'],
+          ]);
+        });
+
+        it('move robot up', () => {
+          const warehouse: Warehouse = [
+            ['.', '#', '.'],
+            ['.', 'O', '.'],
+            ['.', 'O', '.'],
+            ['.', 'O', '.'],
+            ['.', '@', '.'],
+            ['.', '.', '.'],
+          ];
+          const robotPosition: Position = [4, 1];
+          const direction: Direction = '^';
+
+          const result = moveRobot(warehouse, robotPosition, direction);
+          expect(result).toEqual([4, 1]);
+          expect(warehouse).toEqual([
+            ['.', '#', '.'],
+            ['.', 'O', '.'],
+            ['.', 'O', '.'],
+            ['.', 'O', '.'],
+            ['.', '@', '.'],
+            ['.', '.', '.'],
+          ]);
+        });
+        it('move robot down', () => {
+          const warehouse: Warehouse = [
+            ['.', '.', '.'],
+            ['.', '@', '.'],
+            ['.', 'O', '.'],
+            ['.', 'O', '.'],
+            ['.', 'O', '.'],
+            ['.', '#', '.'],
+          ];
+          const robotPosition: Position = [1, 1];
+          const direction: Direction = 'v';
+
+          const result = moveRobot(warehouse, robotPosition, direction);
+          expect(warehouse).toEqual([
+            ['.', '.', '.'],
+            ['.', '@', '.'],
+            ['.', 'O', '.'],
+            ['.', 'O', '.'],
+            ['.', 'O', '.'],
+            ['.', '#', '.'],
+          ]);
+          expect(result).toEqual([1, 1]);
+        });
       });
     });
   });
