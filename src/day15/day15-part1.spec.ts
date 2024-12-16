@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { part1 } from './day15-part1';
 
-describe('day15', () => {
+describe('day15 part 1', () => {
   let data: string;
   beforeEach(() => {
     data = fs.readFileSync('./src/day15/day15.txt', 'utf8');
