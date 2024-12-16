@@ -1,4 +1,4 @@
-import { Direction, Position, Warehouse, moveBox, moveRobot, warehouseToString } from './day15';
+import { Direction, Position, Warehouse, moveBox, moveRobot, warehouseToString } from './day15-part1';
 
 describe('day15', () => {
   describe('warehouseToString', () => {
