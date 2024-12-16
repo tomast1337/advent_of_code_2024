@@ -5,31 +5,30 @@ const MapItens: Record<string, MapItens> = {
   BOX: 'O',
   ROBOT: '@',
 };
-
+export type Position = [number, number];
+export type Warehouse = MapItens[][];
 export type Direction = '^' | 'v' | '<' | '>';
-
 const Directions: Record<string, Direction> = {
   UP: '^',
   DOWN: 'v',
   LEFT: '<',
   RIGHT: '>',
-};
-
-export type Position = [number, number];
-
-export type Warehouse = MapItens[][];
+} as const;
 
 const movements = {
   [Directions.UP]: (position: Position) => [position[0] - 1, position[1]],
   [Directions.DOWN]: (position: Position) => [position[0] + 1, position[1]],
   [Directions.LEFT]: (position: Position) => [position[0], position[1] - 1],
   [Directions.RIGHT]: (position: Position) => [position[0], position[1] + 1],
-};
+} as const;
 
 const parseRobotMovementInstructions = (data: string) => {
   const [map, moves] = data.split('\n\n');
   const warehouse = map.split('\n').map((row) => row.split('') as MapItens[]);
-  const robotInstructions = moves.split('').map((move) => move as Direction);
+  const robotInstructions = moves
+    .replaceAll('\n', '')
+    .split('')
+    .map((move) => move as Direction);
   const robotPosition: Position = warehouse.reduce(
     (acc, row, y) => {
       const x = row.findIndex((item) => item === MapItens.ROBOT);
@@ -97,12 +96,10 @@ export const warehouseToString = (warehouse: Warehouse) =>
     .replace(/O/g, '📦')
     .replace(/\./g, '🟦');
 
-const printWarehouse = (warehouse: Warehouse) => process.stdout.write(warehouseToString(warehouse) + '\n\n');
-
 const simulateRobot = (warehouse: Warehouse, robotInstructions: Direction[], robotPosition: Position) => {
   robotInstructions.forEach((direction) => {
-    moveRobot(warehouse, robotPosition, direction);
-    printWarehouse(warehouse);
+    robotPosition = moveRobot(warehouse, robotPosition, direction);
+    //process.stdout.write(warehouseToString(warehouse) + `\n\nStep: ${step + 1} - Last Direction: ${direction}\n`);
   });
 };
 
