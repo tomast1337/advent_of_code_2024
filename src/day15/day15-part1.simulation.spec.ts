@@ -1,6 +1,6 @@
 import { Direction, Position, Warehouse, moveBox, moveRobot, warehouseToString } from './day15-part1';
 
-describe('day15', () => {
+describe('day15 part1 simulation specs', () => {
   describe('warehouseToString', () => {
     it('should convert warehouse to string with correct symbols', () => {
       const warehouse = [
