@@ -20,7 +20,7 @@ describe('day15 part 2', () => {
 <vv<<^^<<^^`),
     );
   });
-  /*
+
   it('should solve part 1 with small test data', () => {
     expect(
       part1(`########
@@ -66,5 +66,5 @@ v^^>>><<^^<>>^v^<v^vv<>v^<<>^<^v^v><^<<<><<^<v><v<>vv>>v><v^<vv<>v^<<^`,
   it('should solve part 1', () => {
     const result = part1(data);
     console.log(`Result part1: ${result}`);
-  });*/
+  });
 });

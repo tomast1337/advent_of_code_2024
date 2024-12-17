@@ -47,92 +47,87 @@ export const parseRobotMovementInstructions = (data: string) => {
   throw Error('No robot found');
 };
 
+export const findConnectedBoxes = (warehouse: Warehouse, start: Position, direction: Direction) => {
+  let startLeft: Position;
+  let startRight: Position;
+  if (warehouse[start[0]][start[1]] === MapItens.BOX_LEFT) {
+    startLeft = start;
+    startRight = [start[0], start[1] + 1];
+  } else {
+    startLeft = [start[0], start[1] - 1];
+    startRight = start;
+  }
+
+  const stack: Position[] = [startLeft, startRight];
+  const visited: Set<string> = new Set();
+  const connectedBoxes: {
+    position: Position;
+    type: MapItens;
+  }[] = [];
+
+  while (stack.length > 0) {
+    const current = stack.pop()!;
+    const key = `${current[0]},${current[1]}`;
+    if (visited.has(key)) continue;
+    visited.add(key);
+    connectedBoxes.push({
+      position: current,
+      type: warehouse[current[0]][current[1]],
+    });
+
+    const [newY, newX] = movements[direction](current);
+    if (
+      newY >= 0 &&
+      newY < warehouse.length &&
+      newX >= 0 &&
+      newX < warehouse[0].length &&
+      (warehouse[newY][newX] === MapItens.BOX_LEFT || warehouse[newY][newX] === MapItens.BOX_RIGHT)
+    ) {
+      let nextBoxL: Position;
+      let nextBoxR: Position;
+      if (warehouse[newY][newX] === MapItens.BOX_LEFT) {
+        nextBoxL = [newY, newX];
+        nextBoxR = [newY, newX + 1];
+      } else {
+        nextBoxL = [newY, newX - 1];
+        nextBoxR = [newY, newX];
+      }
+      stack.push(nextBoxL);
+      stack.push(nextBoxR);
+    }
+  }
+
+  return connectedBoxes;
+};
+
 export const moveBox = (warehouse: Warehouse, boxPosition: Position, direction: Direction): boolean => {
-  const boxSide = warehouse[boxPosition[0]][boxPosition[1]];
-  let boxLeft: Position;
-  let boxRight: Position;
-  if (warehouse[boxPosition[0]][boxPosition[1]] === MapItens.BOX_LEFT) {
-    boxLeft = boxPosition;
-    boxRight = [boxPosition[0], boxPosition[1] + 1];
-  } else {
-    boxRight = boxPosition;
-    boxLeft = [boxPosition[0], boxPosition[1] - 1];
-  }
-  const newBoxLeft = movements[direction](boxLeft);
-  const newBoxRight = movements[direction](boxRight);
-  // Check for out-of-bounds or wall
-  if (
-    newBoxLeft[0] < 0 ||
-    newBoxLeft[0] >= warehouse.length ||
-    newBoxLeft[1] < 0 ||
-    newBoxLeft[1] >= warehouse[0].length ||
-    warehouse[newBoxLeft[0]][newBoxLeft[1]] === MapItens.WALL
-  ) {
-    return false;
-  }
-  if (
-    newBoxRight[0] < 0 ||
-    newBoxRight[0] >= warehouse.length ||
-    newBoxRight[1] < 0 ||
-    newBoxRight[1] >= warehouse[0].length ||
-    warehouse[newBoxRight[0]][newBoxRight[1]] === MapItens.WALL
-  ) {
-    return false;
-  }
-  // Check for walls directly in the direction of movement
-  if (direction === Directions.UP) {
-    if (warehouse[newBoxLeft[0]][newBoxLeft[1]] === MapItens.WALL || warehouse[newBoxRight[0]][newBoxRight[1]] === MapItens.WALL) {
-      return false;
+  const connectedBoxes = findConnectedBoxes(warehouse, boxPosition, direction);
+  for (const box of connectedBoxes) {
+    const [newY, newX] = movements[direction](box.position);
+    // Bounds checking
+    if (newY < 0 || newY >= warehouse.length || newX < 0 || newX >= warehouse[0].length) {
+      return false; // Out of bounds, box cannot be moved
     }
-  } else if (direction === Directions.DOWN) {
-    if (warehouse[newBoxLeft[0]][newBoxLeft[1]] === MapItens.WALL || warehouse[newBoxRight[0]][newBoxRight[1]] === MapItens.WALL) {
-      return false;
-    }
-  } else {
-    if (warehouse[newBoxLeft[0]][newBoxLeft[1]] === MapItens.WALL || warehouse[newBoxRight[0]][newBoxRight[1]] === MapItens.WALL) {
-      return false;
+    if (warehouse[newY][newX] === MapItens.WALL) {
+      return false; // Wall, box cannot be moved
     }
   }
 
-  // Check for other boxes on left or right
-  // If there's another box, attempt to move it recursively
-  if (direction === Directions.UP || direction === Directions.DOWN) {
-    if (warehouse[newBoxLeft[0]][newBoxLeft[1]] === MapItens.BOX_LEFT || warehouse[newBoxLeft[0]][newBoxLeft[1]] === MapItens.BOX_RIGHT) {
-      if (!moveBox(warehouse, newBoxLeft, direction)) {
-        return false;
-      }
-    }
-    if (warehouse[newBoxRight[0]][newBoxRight[1]] === MapItens.BOX_LEFT || warehouse[newBoxRight[0]][newBoxRight[1]] === MapItens.BOX_RIGHT) {
-      if (!moveBox(warehouse, newBoxRight, direction)) {
-        return false;
-      }
-    }
-  } else {
-    // left and right
-    if (boxSide === MapItens.BOX_LEFT) {
-      if (warehouse[newBoxLeft[0]][newBoxLeft[1]] === MapItens.BOX_LEFT || warehouse[newBoxLeft[0]][newBoxLeft[1]] === MapItens.BOX_RIGHT) {
-        if (!moveBox(warehouse, newBoxLeft, direction)) {
-          return false;
-        }
-      }
-    } else {
-      if (warehouse[newBoxRight[0]][newBoxRight[1]] === MapItens.BOX_LEFT || warehouse[newBoxRight[0]][newBoxRight[1]] === MapItens.BOX_RIGHT) {
-        if (!moveBox(warehouse, newBoxRight, direction)) {
-          return false;
-        }
-      }
-    }
+  // Move all connected boxes
+  // replace all boxes with empty spaces
+  for (const { position } of connectedBoxes) {
+    warehouse[position[0]][position[1]] = MapItens.EMPTY;
+  }
+  // place all boxes in the new position
+  for (const { position, type } of connectedBoxes) {
+    const [newY, newX] = movements[direction](position);
+    warehouse[newY][newX] = type;
   }
 
-  // Move the box left and right simultaneously
-  warehouse[boxLeft[0]][boxLeft[1]] = MapItens.EMPTY;
-  warehouse[boxRight[0]][boxRight[1]] = MapItens.EMPTY;
-  warehouse[newBoxLeft[0]][newBoxLeft[1]] = MapItens.BOX_LEFT;
-  warehouse[newBoxRight[0]][newBoxRight[1]] = MapItens.BOX_RIGHT;
   return true;
 };
 
-export const moveRobot = (warehouse: Warehouse, robotPosition: Position, direction: Direction): Position => {
+export const moveRobot = (warehouse: Warehouse, robotPosition: Position, direction: Direction) => {
   if (warehouse[robotPosition[0]][robotPosition[1]] !== MapItens.ROBOT) {
     throw new Error(`Robot is not in the correct position: ${robotPosition}, found a "${warehouse[robotPosition[0]][robotPosition[1]]}"`);
   }
@@ -146,16 +141,14 @@ export const moveRobot = (warehouse: Warehouse, robotPosition: Position, directi
     return robotPosition; // Wall, robot stays in place
   }
   if (target === MapItens.BOX_LEFT || target === MapItens.BOX_RIGHT) {
-    // Attempt to move the box
-    const boxMoved = moveBox(warehouse, [newY, newX], direction);
-    if (!boxMoved) {
-      return robotPosition; // Box couldn't be moved, robot stays in place
+    if (!moveBox(warehouse, [newY, newX], direction)) {
+      return robotPosition; // Box cannot be moved, robot stays in place
     }
   }
-  // Move robot
-  warehouse[newY][newX] = MapItens.ROBOT;
+  // Move the robot
   warehouse[robotPosition[0]][robotPosition[1]] = MapItens.EMPTY;
-  return [newY, newX];
+  warehouse[newY][newX] = MapItens.ROBOT;
+  return [newY, newX] as Position;
 };
 
 export const warehouseToString = (warehouse: Warehouse) =>
@@ -170,21 +163,12 @@ export const warehouseToString = (warehouse: Warehouse) =>
     .replace(/\./g, '🟦');
 
 const simulateRobot = (warehouse: Warehouse, robotInstructions: Direction[], robotPosition: Position) => {
-  robotInstructions.forEach((direction) => {
-    robotPosition = moveRobot(warehouse, robotPosition, direction);
-    process.stdout.write(warehouseToString(warehouse) + '\n\n');
-  });
+  robotInstructions.forEach((direction) => (robotPosition = moveRobot(warehouse, robotPosition, direction)));
 };
 
-export const calculateGPS = (warehouse: Warehouse): number => {
+export const calculateGPS = (warehouse: Warehouse) => {
   let gpsSum = 0;
-  for (let y = 0; y < warehouse.length; y++) {
-    for (let x = 0; x < warehouse[0].length; x++) {
-      if (warehouse[y][x] === MapItens.BOX) {
-        gpsSum += 100 * y + x;
-      }
-    }
-  }
+  for (let y = 0; y < warehouse.length; y++) for (let x = 0; x < warehouse[0].length; x++) if (warehouse[y][x] === MapItens.BOX_LEFT) gpsSum += 100 * y + x;
   return gpsSum;
 };
 
