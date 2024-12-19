@@ -77,7 +77,7 @@ const heuristic = (pos1: Position, pos2: Position): number => {
   return Math.abs(pos1[0] - pos2[0]) + Math.abs(pos1[1] - pos2[1]);
 };
 
-export const findLowestScore = (input: string): number => {
+const findLowestScore = (input: string): number => {
   const { maze, start, end } = parseMaze(input);
   const startState: State = { position: start, direction: 'E', score: 0 };
   const endPosition = end;
@@ -118,4 +118,77 @@ export const findLowestScore = (input: string): number => {
   }
 
   return -1; // If no path is found
+};
+
+const findShortestPathsTilesCount = (input: string): number => {
+  const { maze, start, end } = parseMaze(input);
+
+  const [endY, endX] = end;
+  const rows = maze.length;
+  const cols = maze[0].length;
+
+  const isValid = (y: number, x: number): boolean => y >= 0 && y < rows && x >= 0 && x < cols && maze[y][x] !== '#';
+
+  const directions = Object.values(movements);
+
+  // Step 1: BFS to calculate shortest distances
+  const distances = new Map<string, number>();
+  const queue: [number, number, number][] = [[...start, 0]]; // [y, x, distance]
+
+  const toKey = (y: number, x: number): string => `${y},${x}`;
+
+  distances.set(toKey(start[0], start[1]), 0);
+
+  while (queue.length > 0) {
+    const [currentY, currentX, dist] = queue.shift()!;
+
+    for (const [dy, dx] of directions) {
+      const nextY = currentY + dy;
+      const nextX = currentX + dx;
+
+      if (isValid(nextY, nextX)) {
+        const key = toKey(nextY, nextX);
+
+        if (!distances.has(key) || dist + 1 < distances.get(key)!) {
+          distances.set(key, dist + 1);
+          queue.push([nextY, nextX, dist + 1]);
+        }
+      }
+    }
+  }
+
+  const shortestDistance = distances.get(toKey(endY, endX));
+  if (shortestDistance === undefined) return 0; // No path exists
+
+  // Step 2: Backtrack to collect shortest path tiles
+  const pathTiles = new Set<string>();
+  const backtrackQueue: [number, number][] = [[endY, endX]];
+
+  while (backtrackQueue.length > 0) {
+    const [currentY, currentX] = backtrackQueue.pop()!;
+    const currentKey = toKey(currentY, currentX);
+
+    pathTiles.add(currentKey);
+
+    for (const [dy, dx] of directions) {
+      const prevY = currentY - dy;
+      const prevX = currentX - dx;
+
+      if (isValid(prevY, prevX)) {
+        const prevKey = toKey(prevY, prevX);
+
+        if (distances.has(prevKey) && distances.get(prevKey)! === distances.get(currentKey)! - 1) {
+          backtrackQueue.push([prevY, prevX]);
+        }
+      }
+    }
+  }
+
+  return pathTiles.size;
+};
+export const solve = (input: string) => {
+  return {
+    part1: findLowestScore(input),
+    part2: findShortestPathsTilesCount(input),
+  };
 };
